@@ -1,0 +1,140 @@
+---
+
+
+# HTTPD Deployment Playbook
+
+
+
+
+
+- hosts: awswebservers
+  become: true
+  vars_files:
+  - "{{playbook_dir}}/../var_files/test_webserverone.yml"
+  tasks:
+# install httpd
+
+  - name: install httpd
+    package:
+      name: httpd
+      state: present
+
+
+
+# Create httpd directories
+
+  - name: ansible create httpd directories
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - '/var/www/{{webserver}}/html'
+      - '/var/www/{{webserver}}/log'
+      - '/etc/httpd/sites-enabled'
+      - '/etc/httpd/sites-available'
+
+
+
+# Set default permission (755) to /var/www
+
+  - name: set permission (755) to /var/www
+    file:
+      path: /var/www
+      mode: 0755
+
+      
+
+# Template index.html to /var/www/{{webserver}}/html/index.html
+
+  - name: Template index.html to /var/www/{{webserver}}/html/index.html
+    template:
+      src: ../templates/index.html.j2
+      dest: /var/www/{{webserver}}/html/index.html
+
+
+
+# Template httpd.conf.j2 to /etc/httpd/conf/httpd.conf
+
+
+  - name: template httpd.conf.j2 to httpd.conf
+    template:
+      src: ../templates/httpd.conf.j2
+      dest: /etc/httpd/conf/httpd.conf
+
+
+
+# Template webserver.conf.j2 to /etc/httpd/sites-available/{{webserver}}.conf
+
+  - name: Template webserver.conf.j2 to /etc/httpd/sites-available/{{webserver}}.conf
+    template:
+      src: ../templates/webserver.conf.j2
+      dest: /etc/httpd/sites-available/{{webserver}}.conf
+
+
+
+
+# Template webserver.conf.j2 to /etc/httpd/sites-enabled/{{webserver}}.conf
+
+  - name: Template webserver.conf.j2 to /etc/httpd/sites-enabled/{{webserver}}.conf
+    template:
+      src: ../templates/webserver.conf.j2
+      dest: /etc/httpd/sites-enabled/{{webserver}}.conf
+
+
+
+
+# Install policycoreutils-python
+
+  - name: install policycoreutils-python
+    yum:
+      name: policycoreutils-python 
+      state: present
+
+
+
+# Change the context type of the /var/www/{{webserver}}/log directory to httpd_log_t. The type httpd_log_t allows Apache to generate and append to web application log files (/var/www/{{webserver}}/log)
+
+  - name: Allow apache to modify files in /var/www/{{webserver}}/log
+    sefcontext:
+      target: "/var/www/{{webserver}}/log(/.*)?"
+      setype: httpd_log_t
+      state: present
+
+
+
+# Disable firewalld service, if it is not already disabled
+
+  - name: Disable firewalld service, if it is not already disabled
+    service:
+      name: firewalld
+      enabled: no
+      state: stopped
+    failed_when: false
+
+
+# Start httpd service, if it is not already started
+
+  - name: Start service httpd, if not started
+    service:
+      name: httpd
+      enabled: yes
+      state: started
+
+
+
+# Setsebool -P httpd_unified 1
+
+  - name: setsebool -P httpd_unified 1
+    seboolean:
+      name: httpd_unified
+      state: yes
+      persistent: yes
+    register: seboolout
+
+  - debug: var=seboolout
+  - name: Check changed to restore context to reload selinux
+    shell: restorecon -R -v /var/www/{{webserver}}/log
+    when: seboolout.changed
+
+
+  

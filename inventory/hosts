@@ -1,0 +1,14 @@
+localhost ansible_connection=local
+
+[localservers]
+localhost
+
+[localservers:vars]
+myvar=changed
+
+[awswebservers]
+ip-10-0-1-9.eu-west-2.compute.internal
+ip-10-0-1-227.eu-west-2.compute.internal
+
+[awsproxy]
+ip-10-0-1-116.eu-west-2.compute.internal

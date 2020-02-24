@@ -1,0 +1,12 @@
+---
+
+- hosts: awswebservers
+  become: true
+  tasks:
+  - name: Restart service httpd
+    service:
+      name: httpd
+      state: restarted
+    
+
+

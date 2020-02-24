@@ -1,0 +1,4 @@
+---
+
+virtualhost_listen_address: '*:80'
+webserver: mywebserver.com

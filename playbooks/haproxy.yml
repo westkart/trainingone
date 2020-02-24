@@ -1,0 +1,23 @@
+---
+
+# haproxy install for loadbalancing httpd webserver(s)
+
+
+- hosts: awsproxy
+  become: true
+  vars_files: /home/kris/code/mytest/var_files/haproxy.yml
+  tasks:
+
+# Install haproxy
+
+  - name: install haproxy
+    yum:
+      name: haproxy
+      state: present
+
+# Template haproxy.cfg to /etc/haproxy/haproxy.cfg
+
+  - name: Template haproxy.cfg to /etc/haproxy/haproxy.cfg
+    template:
+      src: ../templates/haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg

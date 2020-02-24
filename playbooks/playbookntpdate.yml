@@ -1,0 +1,9 @@
+---
+
+- hosts: localhost
+  become: yes
+  tasks: 
+    - name: install ntpdate
+      package:
+        name: ntpdate
+        state: present

@@ -1,0 +1,10 @@
+---
+
+- hosts: localhost
+  tasks: 
+  - debug: 
+      msg: "{{groups.awswebservers}}"
+  - debug: 
+      msg: "{{groups.awswebservers[0]}}"
+  - debug: 
+      msg: "{{groups.awswebservers[1]}}"

@@ -1,0 +1,20 @@
+---
+
+proxy:{
+  frontendname: {{frontend_name_0}}
+  listenaddress: 80
+  filter: [
+    { matchcriteria: "hdr_sub(host) -i {{acl_condition_name_0}}", backend: {{backend_name_0}} }
+  ]
+  backend: {
+    name: {{backend_name_0}}
+    servers: [
+      {server_name: {{server_name_0}}, server_host: {{groups.awswebservers[0]}}, server_port: {{server_port}}},
+      {server_name: {{server_name_1}}, server_host: {{groups.awswebservers[1]}}, server_port: {{server_port}}},
+    ]
+    hostname_header: {{header_name_0}}
+    balancer_type: {{load_balancer_type}}
+    
+  }
+  
+}

@@ -1,0 +1,24 @@
+# proxy configuration file
+# to be stored in /etc/haproxy/haproxy.cfg
+
+global
+  log /dev/log local0
+
+defaults
+  mode {{mode_type}}
+  timeout connect {{timeout_connect}}
+  timeout client {{timeout_client}}
+  timeout server {{timeout_server}}
+
+backend {{backend_name_0}}
+  balance {{load_balancer_type}}
+  http-request set-header {{groups.awswebservers[0]}} {{header_name_0}}
+  http-request set-header {{groups.awswebservers[1]}} {{header_name_0}} 
+  server {{server_name_0}} {{groups.awswebservers[0]}}:{{server_port}} check
+  server {{server_name_1}} {{groups.awswebservers[1]}}:{{server_port}} check
+
+frontend {{proxy.frontendname}}
+  bind {{proxy.frontend.listenaddress}}
+  acl host_ws1 hdr_sub(host) -i {{proxy.acl_condition_name_0}}
+  use_backend {{backend_name_0}} if host_ws1
+  default_backend {{default_backend}}

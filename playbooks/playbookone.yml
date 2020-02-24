@@ -1,0 +1,18 @@
+---
+
+- hosts: localhost
+  vars: 
+    myvar: "123" 
+  tasks: 
+    - name: testmessage
+      debug: 
+        msg: "helloworld ip={{ ansible_default_ipv4.address }}"
+
+    - name: testmessage two
+      debug: 
+        msg: "{{myvar}}"
+
+    - name: generate template file
+      template: 
+        src: ../templates/mytemplate.j2
+        dest: /tmp/myfile.txt

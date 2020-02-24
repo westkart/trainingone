@@ -1,0 +1,27 @@
+# awsproxy group_vars
+
+timeout_connect: 5000ms
+timeout_client: 50000ms
+timeout_server: 50000ms
+
+load_balancer_type: roundrobin
+mode_type: http
+
+backend_name_0: webserverone_backend
+backend_name_1: webservertwo_backend
+frontend_name_0: webserverone_frontend
+frontend_name_1: webservertwo_frontend
+
+default_backend: httpdbackend
+
+server_port: '80'
+frontend_listen_address: '*:80'
+
+server_name_0: httpd-tnode2
+server_name_1: httpd-tnode3
+
+header_name_0: webserverone.kris
+header_name_1: webservertwo.kris
+
+acl_condition_name_0: webserverone
+acl_condition_name_1: webservertwo
