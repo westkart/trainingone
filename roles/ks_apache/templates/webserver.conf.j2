@@ -1,0 +1,6 @@
+<VirtualHost {{ ks_apache_virtualhost_listen_address }}>
+    ServerName {{ ks_apache_webserver }}
+    ServerAlias {{ ks_apache_webserver }}
+    DocumentRoot /var/www/{{ ks_apache_webserver }}/html
+</VirtualHost>
+

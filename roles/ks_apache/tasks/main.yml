@@ -1,0 +1,76 @@
+---
+- name: Make assertions
+  assert:
+    that:
+      - ks_apache_webserver is defined and ks_apache_webserver is not none and ks_apache_webserver is not ''
+
+- name: install httpd
+  package:
+    name: httpd
+    state: present
+
+- name: ansible create httpd directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - '/var/www/{{ ks_apache_webserver }}/html'
+    - '/var/www/{{ ks_apache_webserver }}/log'
+    - '/etc/httpd/sites-enabled'
+    - '/etc/httpd/sites-available'
+
+- name: set permission (755) to /var/www
+  file:
+    path: /var/www
+    mode: 0755
+
+- name: Template index.html to /var/www/{{ ks_apache_webserver }}/html/index.html
+  template:
+    src: index.html.j2
+    dest: /var/www/{{ ks_apache_webserver }}/html/index.html
+
+- name: template httpd.conf.j2 to httpd.conf
+  template:
+    src: httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+  notify:
+    - Restart Apache
+
+- name: Template webserver.conf.j2 to /etc/httpd/sites-available/{{ ks_apache_webserver }}.conf
+  template:
+    src: webserver.conf.j2
+    dest: /etc/httpd/sites-available/{{ ks_apache_webserver }}.conf
+
+- name: Template webserver.conf.j2 to /etc/httpd/sites-enabled/{{ ks_apache_webserver }}.conf
+  template:
+    src: webserver.conf.j2
+    dest: /etc/httpd/sites-enabled/{{ ks_apache_webserver }}.conf
+
+- name: install policycoreutils-python
+  yum:
+    name: policycoreutils-python
+    state: present
+
+- name: Allow apache to modify files in /var/www/{{ ks_apache_webserver }}/log
+  sefcontext:
+    target: "/var/www/{{ ks_apache_webserver }}/log(/.*)?"
+    setype: httpd_log_t
+    state: present
+
+- name: Start service httpd, if not started
+  service:
+    name: httpd
+    enabled: yes
+    state: started
+
+- name: setsebool -P httpd_unified 1
+  seboolean:
+    name: httpd_unified
+    state: yes
+    persistent: yes
+  register: seboolout
+
+- name: Check changed to restore context to reload selinux
+  shell: restorecon -R -v /var/www/{{ ks_apache_webserver }}/log
+  when: seboolout.changed
+
