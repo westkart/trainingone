@@ -1,0 +1,13 @@
+---
+# HTTPD Deployment Playbook
+
+- hosts: awswebservers
+  become: true
+  vars_files:
+  - "{{playbook_dir}}/../var_files/test_webserverone.yml"
+  tasks:
+  - name: Include ks_apache
+    include_role: 
+      name: ks_apache
+    vars: 
+      ks_apache_webserver: "{{ webserver }}"

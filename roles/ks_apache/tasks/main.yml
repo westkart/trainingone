@@ -2,7 +2,9 @@
 - name: Make assertions
   assert:
     that:
-      - ks_apache_webserver is defined and ks_apache_webserver is not none and ks_apache_webserver is not ''
+      - ks_apache_webserver is defined
+      - ks_apache_webserver is not none
+      - ks_apache_webserver != ''
 
 - name: install httpd
   package:
