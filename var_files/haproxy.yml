@@ -1,20 +1,35 @@
 ---
-
-proxy:{
-  frontendname: {{frontend_name_0}}
-  listenaddress: 80
-  filter: [
-    { matchcriteria: "hdr_sub(host) -i {{acl_condition_name_0}}", backend: {{backend_name_0}} }
-  ]
-  backend: {
-    name: {{backend_name_0}}
-    servers: [
-      {server_name: {{server_name_0}}, server_host: {{groups.awswebservers[0]}}, server_port: {{server_port}}},
-      {server_name: {{server_name_1}}, server_host: {{groups.awswebservers[1]}}, server_port: {{server_port}}},
-    ]
-    hostname_header: {{header_name_0}}
-    balancer_type: {{load_balancer_type}}
-    
+proxies: [
+  {
+    frontendname: webserverone_frontend,
+    bind: '*:80',
+    filters: [
+      { matchcriteria: "hdr_sub(host) -i webserverone.kris", backend: webserverone_backend }
+    ],
+    backend: {
+      name: webserverone_backend,
+      servers: [
+        {server_name: http_server1, server_host: ip-10-0-1-9.eu-west-2.compute.internal,   server_port: '80' },
+        {server_name: http_server2, server_host: ip-10-0-1-227.eu-west-2.compute.internal, server_port: '80' },
+      ],
+      hostname_header: webserverone.kris,
+      balancer_type: roundrobin,
+    }
+  },
+  {
+    frontendname: webservertwo_frontend,
+    bind: '*:80',
+    filters: [
+      { matchcriteria: "hdr_sub(host) -i webservertwo.kris", backend: webservertwo_backend }
+    ],
+    backend: {
+      name: webservertwo_backend,
+      servers: [
+        {server_name: http_server1, server_host: ip-10-0-1-9.eu-west-2.compute.internal,   server_port: '80' },
+        {server_name: http_server2, server_host: ip-10-0-1-227.eu-west-2.compute.internal, server_port: '80' },
+      ],
+      hostname_header: webservertwo.kris,
+      balancer_type: roundrobin,
+    }
   }
-  
-}
+]
