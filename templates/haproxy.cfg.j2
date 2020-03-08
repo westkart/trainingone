@@ -1,0 +1,31 @@
+# proxy configuration file
+# to be stored in /etc/haproxy/haproxy.cfg
+
+global
+  log /dev/log local0
+
+defaults
+  mode http
+  timeout connect 5000ms
+  timeout client 50000ms
+  timeout server 50000ms
+
+{% for proxy in proxies %}
+frontend {{ proxy.frontendname }}
+  bind {{ proxy.bind }}
+{% for filter in proxy.filters %}
+  acl {{ proxy.frontendname }}{{ loop.index }} {{ filter.matchcriteria }}
+  use_backend {{ proxy.backend.name }} if {{ proxy.frontendname }}{{ loop.index }}
+{% endfor %}
+  default_backend {{ proxy.backend.name }}
+
+backend {{ proxy.backend.name }}
+  balance {{ proxy.backend.balancer_type }}
+{% for server in proxy.backend.servers %}
+  http-request set-header {{ server.server_host }} {{ proxy.backend.hostname_header }}
+{% endfor %}
+{% for server in proxy.backend.servers %}
+  server {{ server.server_name }} {{ server.server_host }}:{{ server.server_port }} check
+{% endfor %}
+
+{% endfor %}
