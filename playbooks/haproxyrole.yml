@@ -1,0 +1,17 @@
+---
+# Haproxy Deployment Playbook
+
+- hosts: awsproxy
+  become: true
+
+  tasks:
+  - name: Include ks_haproxy
+    include_role:
+      name: ks_haproxy
+    vars:
+      ks_apache_webserver: "{{ webserver_name }}"
+    with_items:
+      - webserverone.kris
+      - webservertwo.kris
+    loop_control:
+      loop_var: webserver_name
